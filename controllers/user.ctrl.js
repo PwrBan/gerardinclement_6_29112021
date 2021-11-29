@@ -1,9 +1,19 @@
 const bcrypt = require('bcrypt');
-const User = require('../models/user');
+const User = require('../models/user.models');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const path = require('path');
+const PasswordValidator = require('password-validator');
+const privateKey = fs.readFileSync(path.join( __dirname, '../env/private.key'), 'utf-8');
+
 
 exports.signup = (req, res, next) => {
-    bcrypt.hash(req.body.password, 10)
+    const schema = new PasswordValidator();
+    schema
+    .is().min(8)
+    .is().digits(1);
+    if (schema.validate(req.body.password)) {
+        bcrypt.hash(req.body.password, 10)
         .then(hash => {
             const user = new User({
                 email: req.body.email,
@@ -13,7 +23,10 @@ exports.signup = (req, res, next) => {
                 .then(() => res.status(201).json({ message: "Utilisateur crée !"}))
                 .catch(error => res.status(400).json({ error }))
         })
-        .catch(error => res.status(500).json({ error }))
+        .catch(error => res.status(500).json({ error })) 
+    }
+    res.status(400).json({message : 'Veuillez utilisé un mot de passe avec 8 caractères minimum et 1 chiffre'})
+    
 };
 exports.login = (req, res, next) => {
     User.findOne({ email: req.body.email})
@@ -30,7 +43,7 @@ exports.login = (req, res, next) => {
                         userId: user._id,
                         token: jwt.sign(
                             { userId: user._id },
-                            'RANDOM_TOKEN_SECRET',
+                            privateKey,
                             { expiresIn: '24h' }
                           )
                     });

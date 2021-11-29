@@ -10,7 +10,9 @@
     "mongoose": "^6.0.10",
     "mongoose-unique-validator": "^3.0.0",
     "multer": "^1.4.3",
-    "nodemon": "^2.0.13"
+    "nodemon": "^2.0.13",
+    "password-validator": "^5.2.1",
+    "validator": "^13.7.0"
   },
   "devDependencies": {},
   "scripts": {
